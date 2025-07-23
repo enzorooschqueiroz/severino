@@ -1,5 +1,6 @@
 # app.py
 from flask import Flask, jsonify
+from config.supabase_client import supabase
 from datetime import datetime
 import os
 import logging
@@ -11,19 +12,27 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+def test():
+    result = supabase.table("users").select("*").execute()
+    print(result.data)
+
+
 def create_app():
     """Factory para criar a aplicação Flask"""
     app = Flask(__name__)
-    
-    # Configurações básicas
-    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-change-in-production')
     
     # Registrar rotas
     register_routes(app)
     
     # Handler de erro global
     register_error_handlers(app)
-    
+
+    # Testar conexão com o Supabase
+    try:
+        test()
+        logger.info("Conexão com Supabase estabelecida com sucesso.")
+    except Exception as e:
+        logger.error(f"Erro ao conectar com Supabase: {str(e)}")    
     return app
 
 def register_routes(app):
