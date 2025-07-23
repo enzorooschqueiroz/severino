@@ -6,10 +6,13 @@ from logs.logger import logger
 from services.supabase_test import test_supabase_connection
 import os
 
+from routes.user_routes import user_bp
+
 def create_app():
     app = Flask(__name__)
     register_routes(app)
     register_error_handlers(app)
+    app.register_blueprint(user_bp)
 
     try:
         test_supabase_connection()
