@@ -1,5 +1,7 @@
+# services/user_services.py
 from config.supabase_client import supabase
-from utils.security import hash_password
+from utils.password_hashing import hash_password, verify_password
+from utils.jwt_implementation import generate_jwt
 from models.user_model import UserCreate
 import logging
 
@@ -17,4 +19,32 @@ def create_user(full_name: str, email: str, password_hash: str):
         return response.data
     except Exception as e:
         logger.error(f"Erro ao criar usuário: {str(e)}")
+        raise
+
+def login_user(email: str, password: str):
+    
+    try:
+        # Buscar o usuário no Supabase
+        response = supabase.table("users").select("*").eq("email", email).execute()
+        users = response.data
+
+        if not users:
+            raise Exception("Usuário não encontrado")
+
+        user = users[0]
+        if not verify_password(password, user["password_hash"]):
+            raise Exception("Senha incorreta")
+
+        token = generate_jwt({
+            "user_id": user["id"],
+            "email": user["email"]
+        })
+
+        return {
+            "access_token": token,
+            "token_type": "bearer"
+        }
+
+    except Exception as e:
+        logger.error(f"Erro ao fazer login: {str(e)}")
         raise
