@@ -77,3 +77,15 @@ def update_user(user_id: str, updates: dict):
     except Exception as e:
         logger.error(f"Erro ao atualizar usuário: {str(e)}")
         raise
+    
+def delete_user(user_id: str):
+    try:
+        response = supabase.table("users").delete().eq("id", user_id).execute()
+
+        if not response.data:
+            raise Exception("Usuário não encontrado")
+
+        return {"message": "Usuário deletado com sucesso"}
+    except Exception as e:
+        logger.error(f"Erro ao deletar usuário: {str(e)}")
+        raise

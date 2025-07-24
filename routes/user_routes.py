@@ -4,6 +4,7 @@ from services.user_services import create_user
 from services.user_services import login_user
 from services.user_services import get_user_by_email
 from services.user_services import update_user
+from services.user_services import delete_user
 import logging
 
 logger = logging.getLogger(__name__)
@@ -72,3 +73,13 @@ def patch_user(user_id):
     except Exception as e:
         logger.error(f"Erro ao atualizar usuário: {str(e)}")
         return jsonify({"error": str(e)}), 400
+
+@user_bp.route('/users/<user_id>', methods=['DELETE'])
+def delete_user_route(user_id):
+    try:
+        result = delete_user(user_id)
+        return jsonify(result), 200
+    except Exception as e:
+        logger.error(f"Erro ao deletar usuário: {str(e)}")
+        return jsonify({"error": str(e)}), 400
+
