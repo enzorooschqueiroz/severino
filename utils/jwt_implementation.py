@@ -12,12 +12,12 @@ JWT_SECRET = os.getenv("JWT_SECRET")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
-def generate_jwt(data: dict) -> str:
+def generate_jwt(data: dict, expires_minutes: int = 60) -> str:
     to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.utcnow() + timedelta(minutes=expires_minutes)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, JWT_SECRET, algorithm=ALGORITHM)
-    return encoded_jwt
+    return jwt.encode(to_encode, JWT_SECRET, algorithm=ALGORITHM)
+
 
 def decode_jwt(token: str) -> dict:
     try:

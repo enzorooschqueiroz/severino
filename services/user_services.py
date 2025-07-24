@@ -3,6 +3,7 @@ from config.supabase_client import supabase
 from utils.password_hashing import hash_password, verify_password
 from utils.jwt_implementation import generate_jwt
 from utils.password_hashing import hash_password
+from utils.jwt_implementation import decode_jwt
 from models.user_model import UserCreate
 import logging
 
@@ -89,3 +90,25 @@ def delete_user(user_id: str):
     except Exception as e:
         logger.error(f"Erro ao deletar usuário: {str(e)}")
         raise
+
+def generate_password_reset_token(email: str) -> str:
+    user = get_user_by_email(email)
+
+    token = generate_jwt({
+        "user_id": user["id"],
+        "email": user["email"],
+        "purpose": "reset_password"
+    }, expires_minutes=15)
+
+    return token
+
+def reset_user_password(token: str, new_password: str):
+    payload = decode_jwt(token)
+
+    if payload.get("purpose") != "reset_password":
+        raise Exception("Token inválido para redefinição de senha")
+
+    user_id = payload.get("user_id")
+
+    # Atualiza a senha usando o service padrão
+    return update_user(user_id, {"password_hash": new_password})

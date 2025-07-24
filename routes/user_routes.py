@@ -7,6 +7,8 @@ from services.user_services import update_user
 from services.user_services import delete_user
 from utils.jwt_implementation import jwt_required
 from utils.jwt_implementation import user_owns_resource
+from services.user_services import generate_password_reset_token
+from services.user_services import reset_user_password
 import logging
 
 logger = logging.getLogger(__name__)
@@ -89,5 +91,38 @@ def delete_user_route(user_id, jwt_payload=None):
         return jsonify(result), 200
     except Exception as e:
         logger.error(f"Erro ao deletar usuário: {str(e)}")
+        return jsonify({"error": str(e)}), 400
+
+@user_bp.route('/forgot-password', methods=['POST'])
+def forgot_password():
+    try:
+        data = request.get_json()
+        email = data.get("email")
+
+        if not email:
+            return jsonify({"error": "E-mail é obrigatório"}), 400
+
+        token = generate_password_reset_token(email)
+        reset_link = f"https://minha-plataforma.com/reset-password?token={token}"
+
+        return jsonify({"reset_link": reset_link}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+@user_bp.route('/reset-password', methods=['POST'])
+def reset_password():
+    try:
+        data = request.get_json()
+        token = data.get("token")
+        new_password = data.get("new_password")
+
+        if not token or not new_password:
+            return jsonify({"error": "Token e nova senha são obrigatórios"}), 400
+
+        reset_user_password(token, new_password)
+
+        return jsonify({"message": "Senha atualizada com sucesso"}), 200
+
+    except Exception as e:
         return jsonify({"error": str(e)}), 400
 
