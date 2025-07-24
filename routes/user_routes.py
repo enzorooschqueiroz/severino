@@ -2,6 +2,7 @@
 from flask import Blueprint, request, jsonify
 from services.user_services import create_user
 from services.user_services import login_user
+from services.user_services import get_user_by_email
 import logging
 
 logger = logging.getLogger(__name__)
@@ -45,3 +46,12 @@ def login():
     except Exception as e:
         logger.error(f"Erro ao fazer login: {str(e)}")
         return jsonify({"error": str(e)}), 401
+
+@user_bp.route('/users/email/<email>', methods=['GET'])
+def get_user_by_email_route(email):
+    try:
+        result = get_user_by_email(email)
+        return jsonify(result), 200
+    except Exception as e:
+        logger.error(f"Erro ao buscar usuário por e-mail: {str(e)}")
+        return jsonify({"error": str(e)}), 404

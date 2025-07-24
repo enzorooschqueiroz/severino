@@ -48,3 +48,14 @@ def login_user(email: str, password: str):
     except Exception as e:
         logger.error(f"Erro ao fazer login: {str(e)}")
         raise
+
+def get_user_by_email(email: str):
+    try:
+        response = supabase.table("users").select("*").eq("email", email).single().execute()
+        if not response.data:
+            raise Exception("Usuário não encontrado")
+        return response.data
+    except Exception as e:
+        logger.error(f"Erro ao buscar usuário por e-mail: {str(e)}")
+        raise
+
