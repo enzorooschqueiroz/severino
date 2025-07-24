@@ -2,6 +2,7 @@
 from config.supabase_client import supabase
 from utils.password_hashing import hash_password, verify_password
 from utils.jwt_implementation import generate_jwt
+from utils.password_hashing import hash_password
 from models.user_model import UserCreate
 import logging
 
@@ -59,3 +60,20 @@ def get_user_by_email(email: str):
         logger.error(f"Erro ao buscar usuário por e-mail: {str(e)}")
         raise
 
+def update_user(user_id: str, updates: dict):
+    try:
+        if "email" in updates:
+            updates.pop("email")
+
+        if "password_hash" in updates:
+            updates["password_hash"] = hash_password(updates["password_hash"])
+
+        response = supabase.table("users").update(updates).eq("id", user_id).execute()
+
+        if not response.data:
+            raise Exception("Usuário não encontrado ou nenhuma mudança realizada")
+
+        return response.data[0]
+    except Exception as e:
+        logger.error(f"Erro ao atualizar usuário: {str(e)}")
+        raise

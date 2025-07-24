@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify
 from services.user_services import create_user
 from services.user_services import login_user
 from services.user_services import get_user_by_email
+from services.user_services import update_user
 import logging
 
 logger = logging.getLogger(__name__)
@@ -55,3 +56,19 @@ def get_user_by_email_route(email):
     except Exception as e:
         logger.error(f"Erro ao buscar usuário por e-mail: {str(e)}")
         return jsonify({"error": str(e)}), 404
+
+@user_bp.route('/users/<user_id>', methods=['PATCH'])
+def patch_user(user_id):
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "Nenhum dado enviado"}), 400
+
+        if "email" in data:
+            raise Exception("Não é permitido alterar o e-mail do usuário")
+        
+        result = update_user(user_id, data)
+        return jsonify(result), 200
+    except Exception as e:
+        logger.error(f"Erro ao atualizar usuário: {str(e)}")
+        return jsonify({"error": str(e)}), 400
