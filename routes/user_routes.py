@@ -5,6 +5,8 @@ from services.user_services import login_user
 from services.user_services import get_user_by_email
 from services.user_services import update_user
 from services.user_services import delete_user
+from utils.jwt_implementation import jwt_required
+from utils.jwt_implementation import user_owns_resource
 import logging
 
 logger = logging.getLogger(__name__)
@@ -50,7 +52,9 @@ def login():
         return jsonify({"error": str(e)}), 401
 
 @user_bp.route('/users/email/<email>', methods=['GET'])
-def get_user_by_email_route(email):
+@jwt_required
+
+def get_user_by_email_route(email, jwt_payload=None):
     try:
         result = get_user_by_email(email)
         return jsonify(result), 200
@@ -59,7 +63,9 @@ def get_user_by_email_route(email):
         return jsonify({"error": str(e)}), 404
 
 @user_bp.route('/users/<user_id>', methods=['PATCH'])
-def patch_user(user_id):
+@jwt_required
+@user_owns_resource
+def patch_user(user_id, jwt_payload=None):
     try:
         data = request.get_json()
         if not data:
@@ -75,7 +81,9 @@ def patch_user(user_id):
         return jsonify({"error": str(e)}), 400
 
 @user_bp.route('/users/<user_id>', methods=['DELETE'])
-def delete_user_route(user_id):
+@jwt_required
+@user_owns_resource
+def delete_user_route(user_id, jwt_payload=None):
     try:
         result = delete_user(user_id)
         return jsonify(result), 200
