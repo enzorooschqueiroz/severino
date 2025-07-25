@@ -4,12 +4,16 @@ from routes import register_routes
 from errors.handlers import register_error_handlers
 from logs.logger import logger
 from services.supabase_test import test_supabase_connection
+from flask_cors import CORS
 import os
 
 from routes.user_routes import user_bp
 
 def create_app():
     app = Flask(__name__)
+
+    CORS(app, resources={r"/*": {"origins": "*"}})
+   
     register_routes(app)
     register_error_handlers(app)
     app.register_blueprint(user_bp)
